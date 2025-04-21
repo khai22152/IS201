@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        body {
+            background-color: lightgray;
+            text-align: center;
+        }
+
+        canvas {
+            border: 1px solid black;
+            background-color: #222;
+            display: block;
+            margin: 20px auto;
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        .content {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+
+  <div class="header">
+    <a href="index.html">Back to Home Page</a>
+    <h1>Snake Game</h1>
+  </div>
+
+  <h2>Use Arrow Keys to Play</h2>
+  <canvas id="snakeGame" width="300" height="300"></canvas>
+
+  <script>
+      const canvas = document.getElementById("snakeGame");
+      const ctx = canvas.getContext("2d");
+
+      const gridSize = 10;  // Size of each grid square
+      const canvasSize = 300;  // Canvas size (300x300)
+      let snake = [{x: 150, y: 150}];  // Initial snake position
+      let food = {x: 100, y: 100};  // Initial food position
+      let direction = "RIGHT";  // Initial movement direction
+      let score = 0;
+
+      // Game loop
+      function gameLoop() {
+          clearCanvas();
+          drawFood();
+          moveSnake();
+          drawSnake();
+          checkCollision();
+          drawScore();
+      }
+
+      // Clear the canvas
+      function clearCanvas() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
+      // Draw the snake
+      function drawSnake() {
+          snake.forEach(segment => {
+              ctx.fillStyle = "#00FF00";
+              ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
+          });
+      }
+
+      // Draw the food
+      function drawFood() {
+          ctx.fillStyle = "#FF0000";
+          ctx.fillRect(food.x, food.y, gridSize, gridSize);
+      }
+
+      // Move the snake
+      function moveSnake() {
+          const head = { ...snake[0] };
+
+          switch (direction) {
+              case "UP":
+                  head.y -= gridSize;
+                  break;
+              case "DOWN":
+                  head.y += gridSize;
+                  break;
+              case "LEFT":
+                  head.x -= gridSize;
+                  break;
+              case "RIGHT":
+                  head.x += gridSize;
+                  break;
+          }
+
+          snake.unshift(head);  // Add new head to the snake
+
+          // If snake eats food
+          if (head.x === food.x && head.y === food.y) {
+              score++;
+              generateFood();  // New food location
+          } else {
+              snake.pop();  // Remove the tail
+          }
+      }
+
+      // Generate new food position
+      function generateFood() {
+          food.x = Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize;
+          food.y = Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize;
+      }
+
+      // Check for collisions with walls or itself
+      function checkCollision() {
+          const head = snake[0];
+
+          // Collision with walls
+          if (head.x < 0 || head.x >= canvasSize || head.y < 0 || head.y >= canvasSize) {
+              resetGame();
+          }
+
+          // Collision with itself
+          for (let i = 1; i < snake.length; i++) {
+              if (head.x === snake[i].x && head.y === snake[i].y) {
+                  resetGame();
+              }
+          }
+      }
+
+      // Reset the game
+      function resetGame() {
+          snake = [{x: 150, y: 150}];
+          direction = "RIGHT";
+          score = 0;
+          generateFood();
+      }
+
+      // Draw the score
+      function drawScore() {
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "16px Arial";
+          ctx.fillText("Score: " + score, 10, 20);
+      }
+
+      // Listen for arrow key presses to change direction
+      document.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowUp" && direction !== "DOWN") {
+              direction = "UP";
+          } else if (e.key === "ArrowDown" && direction !== "UP") {
+              direction = "DOWN";
+          } else if (e.key === "ArrowLeft" && direction !== "RIGHT") {
+              direction = "LEFT";
+          } else if (e.key === "ArrowRight" && direction !== "LEFT") {
+              direction = "RIGHT";
+          }
+      });
+
+      // Start the game
+      generateFood();
+      setInterval(gameLoop, 100);
+  </script>
+
+</body>
+</html>
